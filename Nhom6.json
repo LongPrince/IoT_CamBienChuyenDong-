@@ -1,0 +1,365 @@
+[
+    {
+        "id": "0b71251f19c4ba50",
+        "type": "tab",
+        "label": "Giám Sát Cửa Tự Động (Bản Đầy Đủ)",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "c8e701ad8c5583c5",
+        "type": "mqtt in",
+        "z": "0b71251f19c4ba50",
+        "name": "Nhận Data ESP32",
+        "topic": "iot/door/data",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "mqtt_broker_hivemq",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 170,
+        "y": 340,
+        "wires": [
+            [
+                "392a2ab17129474b"
+            ]
+        ]
+    },
+    {
+        "id": "392a2ab17129474b",
+        "type": "function",
+        "z": "0b71251f19c4ba50",
+        "name": "Xử Lý & Rẽ Nhánh (4 Outputs)",
+        "func": "var msg1 = null; \nvar msg2 = null; \nvar msg3 = null; \nvar msg4 = null; \n\nif (msg.payload.total_time_day !== undefined) {\n    msg1 = { payload: msg.payload.total_time_day };\n}\n\nif (msg.payload.cycle_count !== undefined) {\n    msg2 = { payload: msg.payload.cycle_count };\n}\n\nif (msg.payload.event === \"warning\") {\n    msg3 = msg; \n}\n\nif (msg.payload.maintenance === \"REQUIRED\") {\n    msg4 = msg; \n}\n\nreturn [msg1, msg2, msg3, msg4];",
+        "outputs": 4,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 340,
+        "wires": [
+            [
+                "0771f514efd63724"
+            ],
+            [
+                "7a61c5f76d3b0187"
+            ],
+            [
+                "5f07c0da2d0a3640"
+            ],
+            [
+                "b33491d377eaae0f"
+            ]
+        ]
+    },
+    {
+        "id": "4d15210febd35c70",
+        "type": "ui_switch",
+        "z": "0b71251f19c4ba50",
+        "name": "Nút Mở Cửa (Thủ công)",
+        "label": "Mở cửa tự do (Tắt Cảm Biến)",
+        "tooltip": "Bật để ép mở cửa, tắt để dùng PIR",
+        "group": "4db650804a079bfa",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "iot/door/control",
+        "topicType": "str",
+        "style": "",
+        "onvalue": "MANUAL_ON",
+        "onvalueType": "str",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "AUTO",
+        "offvalueType": "str",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "",
+        "x": 190,
+        "y": 560,
+        "wires": [
+            [
+                "da2694677c8a623e"
+            ]
+        ]
+    },
+    {
+        "id": "da2694677c8a623e",
+        "type": "mqtt out",
+        "z": "0b71251f19c4ba50",
+        "name": "Gửi Lệnh Tới ESP32",
+        "topic": "iot/door/control",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "mqtt_broker_hivemq",
+        "x": 460,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "0771f514efd63724",
+        "type": "ui_chart",
+        "z": "0b71251f19c4ba50",
+        "name": "Biểu Đồ Thời Gian",
+        "group": "ui_group_door",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "label": "Tổng thời gian mở cửa (Giây)",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 890,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5f07c0da2d0a3640",
+        "type": "template",
+        "z": "0b71251f19c4ba50",
+        "name": "Nội Dung Báo Động",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "⚠️ CẢNH BÁO KHẨN CẤP \n\nCỬA MỞ QUÁ GIỜ QUY ĐỊNH!\n---------------------------------------------\n📍 Trạng thái: Phát hiện cửa chưa đóng\n⏱ Thời gian mở hiện tại: {{payload.total_time_day}} giây\n---------------------------------------------\n(Vui lòng kiểm tra hệ thống cửa ngay lập tức !!!)",
+        "output": "str",
+        "x": 800,
+        "y": 320,
+        "wires": [
+            [
+                "e9143c14ddb3cf0a",
+                "b888d3395cee2555"
+            ]
+        ]
+    },
+    {
+        "id": "b33491d377eaae0f",
+        "type": "template",
+        "z": "0b71251f19c4ba50",
+        "name": "Nội Dung Bảo Trì",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "🛠️ YÊU CẦU BẢO TRÌ HỆ THỐNG CỬA!\n\nHệ thống ghi nhận cường độ sử dụng đạt ngưỡng giới hạn.\n---------------------------------------------\n📊 Số lần đóng/mở trong ngày: {{payload.cycle_count}} lần\n⏳ Tổng thời gian hoạt động: {{payload.total_time_day}} giây\n🔧 Tình trạng: CẦN KIỂM TRA ĐỊNH KỲ\n---------------------------------------------\n(Vui lòng thực hiện bảo trì để đảm bảo an toàn vận hành.)",
+        "output": "str",
+        "x": 790,
+        "y": 420,
+        "wires": [
+            [
+                "e9143c14ddb3cf0a",
+                "f1deccb838dc7113"
+            ]
+        ]
+    },
+    {
+        "id": "e9143c14ddb3cf0a",
+        "type": "e-mail",
+        "z": "0b71251f19c4ba50",
+        "server": "smtp.gmail.com",
+        "port": "465",
+        "authtype": "BASIC",
+        "saslformat": false,
+        "token": "oauth2Response.access_token",
+        "secure": true,
+        "tls": true,
+        "name": "22t1020659@husc.edu.vn",
+        "dname": "Email Cảnh Báo",
+        "x": 1140,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "f1deccb838dc7113",
+        "type": "ui_toast",
+        "z": "0b71251f19c4ba50",
+        "position": "prompt",
+        "displayTime": "10",
+        "highlight": "orange",
+        "sendall": true,
+        "outputs": 1,
+        "ok": "OK",
+        "cancel": "Cancel",
+        "raw": false,
+        "className": "",
+        "topic": "Thông Báo Bảo Trì!",
+        "name": "Popup Bảo Trì",
+        "x": 1100,
+        "y": 600,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b888d3395cee2555",
+        "type": "ui_toast",
+        "z": "0b71251f19c4ba50",
+        "position": "prompt",
+        "displayTime": "",
+        "highlight": "red",
+        "sendall": true,
+        "outputs": 1,
+        "ok": "OK",
+        "cancel": "Cancel",
+        "raw": false,
+        "className": "",
+        "topic": "Cảnh Báo Khẩn Cấp!",
+        "name": "Popup Quá Giờ",
+        "x": 1140,
+        "y": 300,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7a61c5f76d3b0187",
+        "type": "ui_gauge",
+        "z": "0b71251f19c4ba50",
+        "name": "Thước Đo Số Lượt",
+        "group": "6d019055021e470b",
+        "order": 1,
+        "width": 6,
+        "height": 4,
+        "gtype": "gage",
+        "title": "Số lượt đóng/mở",
+        "label": "Lần",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "50",
+        "seg2": "80",
+        "diff": false,
+        "className": "",
+        "x": 910,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "mqtt_broker_hivemq",
+        "type": "mqtt-broker",
+        "name": "HiveMQ Cloud",
+        "broker": "0acb987148084628b41bbeed64717bab.s1.eu.hivemq.cloud",
+        "port": "8883",
+        "tls": "",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": true,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "4db650804a079bfa",
+        "type": "ui_group",
+        "name": "Điều Khiển",
+        "tab": "ui_tab_door",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "ui_group_door",
+        "type": "ui_group",
+        "name": "Thống Kê Thời Gian",
+        "tab": "ui_tab_door",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "6d019055021e470b",
+        "type": "ui_group",
+        "name": "Thống Kê Số Lượt (Đóng/Mở)",
+        "tab": "ui_tab_door",
+        "order": 3,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "ui_tab_door",
+        "type": "ui_tab",
+        "name": "HỆ THỐNG QUẢN LÝ CỬA TỰ ĐỘNG",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "a7d8b021f9f78501",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.6",
+            "node-red-node-email": "5.2.1"
+        }
+    }
+]
